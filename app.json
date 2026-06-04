@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "SatyaAuth",
+    "slug": "SatyaAuth",
+    "version": "1.0.0",
+    "icon": "./assets/app_icon.png",
+    "newArchEnabled": false,
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.satyaauth.app",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    }
+  }
+}
