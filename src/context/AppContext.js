@@ -143,7 +143,10 @@ export const AppProvider = ({ children }) => {
     (async () => {
       let location = null;
       try {
-        location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        location = await Location.getLastKnownPositionAsync();
+        if (!location) {
+          location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Lowest });
+        }
       } catch (err) {
         console.warn('Location fetch failed', err);
       }
@@ -163,6 +166,7 @@ export const AppProvider = ({ children }) => {
 
       log.push(record);
       await AsyncStorage.setItem('attendance_log', JSON.stringify(log));
+      setPendingSyncCount(prev => prev + 1);
 
       await logToServer('ATTENDANCE', {
         action: type === 'punch_in' ? 'Punch In' : 'Punch Out',
