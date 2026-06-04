@@ -1,5 +1,5 @@
 import React, { useState, useRef, useContext } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, NativeModules } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, NativeModules, Keyboard } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '../context/AppContext';
@@ -26,6 +26,7 @@ export const RegisterScreen = () => {
   const cameraRef = useRef(null);
 
   const registerSelfie = async () => {
+    Keyboard.dismiss();
     setErrorMsg('');
     if (!nameInput.trim() || !aadhaarInput.trim() || !pinInput.trim()) {
       setErrorMsg('Please fill in all fields');

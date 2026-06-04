@@ -119,16 +119,6 @@ export const AppProvider = ({ children }) => {
   const handlePunchResult = async (matched) => {
     if (!matched) return;
 
-    let location = null;
-    try {
-      // Get location (using balanced accuracy to ensure it resolves quickly even offline)
-      location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-    } catch (err) {
-      console.warn('Location fetch failed', err);
-    }
-    const lat = location?.coords?.latitude || 'Unknown';
-    const lon = location?.coords?.longitude || 'Unknown';
-
     const now = new Date();
     const todayKey = now.toISOString().slice(0, 10);
     const existing = await AsyncStorage.getItem('attendance_log');
@@ -138,20 +128,6 @@ export const AppProvider = ({ children }) => {
     const hasPunchIn = todayRecords.some(r => r.type === 'punch_in');
 
     const type = hasPunchIn ? 'punch_out' : 'punch_in';
-
-    const record = {
-      id: `${todayKey}-${type}-${Date.now()}`,
-      type,
-      timestamp: now.toISOString(),
-      employeeId: workerProfile.aadhaar,
-      name: workerProfile.name,
-      latitude: lat,
-      longitude: lon,
-      synced: false,
-    };
-
-    log.push(record);
-    await AsyncStorage.setItem('attendance_log', JSON.stringify(log));
 
     if (type === 'punch_in') {
       setTodayPunchIn(now);
@@ -163,14 +139,40 @@ export const AppProvider = ({ children }) => {
     setShowResult('success');
     setScreen('HOME');
     
-    await logToServer('ATTENDANCE', {
-      action: type === 'punch_in' ? 'Punch In' : 'Punch Out',
-      name: workerProfile.name,
-      aadhaar: workerProfile.aadhaar,
-      latitude: lat,
-      longitude: lon,
-      message: `User ${workerProfile.name} successfully punched ${type === 'punch_in' ? 'in' : 'out'} at ${lat}, ${lon}`
-    });
+    // Fetch GPS and save to DB asynchronously so it doesn't block UI transition
+    (async () => {
+      let location = null;
+      try {
+        location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      } catch (err) {
+        console.warn('Location fetch failed', err);
+      }
+      const lat = location?.coords?.latitude || 'Unknown';
+      const lon = location?.coords?.longitude || 'Unknown';
+
+      const record = {
+        id: `${todayKey}-${type}-${Date.now()}`,
+        type,
+        timestamp: now.toISOString(),
+        employeeId: workerProfile.aadhaar,
+        name: workerProfile.name,
+        latitude: lat,
+        longitude: lon,
+        synced: false,
+      };
+
+      log.push(record);
+      await AsyncStorage.setItem('attendance_log', JSON.stringify(log));
+
+      await logToServer('ATTENDANCE', {
+        action: type === 'punch_in' ? 'Punch In' : 'Punch Out',
+        name: workerProfile.name,
+        aadhaar: workerProfile.aadhaar,
+        latitude: lat,
+        longitude: lon,
+        message: `User ${workerProfile.name} successfully punched ${type === 'punch_in' ? 'in' : 'out'} at ${lat}, ${lon}`
+      });
+    })();
   };
 
   const handleLogout = async () => {

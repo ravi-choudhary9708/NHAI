@@ -13,6 +13,7 @@ export const CameraScreen = () => {
   const [permission, requestPermission] = useCameraPermissions();
   
   const [isScanning, setIsScanning] = useState(false);
+  const [isMatched, setIsMatched] = useState(false);
   const [status, setStatus] = useState('Position your face in the circle');
   const cameraRef = useRef(null);
   const scanningRef = useRef(false);
@@ -32,6 +33,7 @@ export const CameraScreen = () => {
     if (isScanning || scanningRef.current) return;
 
     setIsScanning(true);
+    setIsMatched(false);
     scanningRef.current = true;
     setStatus('Analyzing Face…');
     await logToServer('VERIFY_START', `Started face verification for Aadhaar: ${workerProfile.aadhaar}`);
@@ -126,6 +128,7 @@ export const CameraScreen = () => {
             await logToServer('UIDAI_CHECK', `UIDAI Face Auth API surface mirrors AadhaarFaceRD format.`);
 
             if (distance < MATCH_THRESHOLD) {
+              setIsMatched(true);
               setStatus('Spoof Rejection Score 0.12 (Live Face)');
               await new Promise(resolve => setTimeout(resolve, 800));
               setStatus('UIDAI AadhaarFaceRD constraints matched');
@@ -191,7 +194,7 @@ export const CameraScreen = () => {
       </View>
       <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="front" />
       <View style={styles.overlay}>
-        <View style={styles.scanAreaMinimal} />
+        <View style={[styles.scanAreaMinimal, isMatched && { borderColor: '#4CAF50', borderWidth: 4 }]} />
         <Text style={styles.statusTextMinimal}>{status}</Text>
       </View>
     </View>

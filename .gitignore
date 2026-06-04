@@ -22,3 +22,6 @@ data.json
 
 # OS Files
 .DS_Store
+
+# Dev scripts
+generate_graph.py
