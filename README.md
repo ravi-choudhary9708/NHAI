@@ -169,12 +169,20 @@ EXPO_PUBLIC_SYNC_SERVER=http://YOUR_LOCAL_IP:4000
 ```
 
 ### 3. Mobile Client Compilation
+
+**Option A: Development & Live Native Logs (Recommended for Judges)**
+To see real-time JNI console logs, TFLite outputs, and telemetry:
 ```bash
 npm install
 npx expo prebuild
+npx expo run:android
+```
+
+**Option B: Production Release Build**
+```bash
 cd android && ./gradlew assembleRelease
 ```
-*Installs the optimized APK directly to your device. Do not use standard `expo start` as custom C++ JNI bindings require native compilation.*
+*Installs the optimized APK directly to your device. Do not use standard `expo start` (Metro bundler only) as custom C++ JNI bindings require native hardware compilation.*
 
 ---
 
