@@ -44,6 +44,35 @@ Built to drop into the existing **Datalake 3.0** React Native app as a self-cont
 
 ---
 
+## 🧮 Mathematical Foundations
+
+SatyaAuth relies on strict deterministic mathematics rather than black-box cloud APIs to ensure 100% offline accuracy and transparency.
+
+### 1. Vector Cosine Distance (Face Matching)
+Once MobileFaceNet extracts a 192-dimensional floating-point embedding ($A$) from a live frame, it is L2-normalized and compared against the registered worker's embedding ($B$) using Cosine Distance.
+
+$$
+\text{Distance} = 1 - \cos(\theta) = 1 - \frac{\sum_{i=1}^{192} A_i B_i}{\sqrt{\sum_{i=1}^{192} A_i^2} \sqrt{\sum_{i=1}^{192} B_i^2}}
+$$
+
+- **Threshold:** `Distance < 0.40`
+- **Result:** If the distance is below the 0.40 threshold, the vectors are pointing in nearly the exact same direction in hyper-dimensional space, confirming a biometric identity match.
+
+### 2. Exponential Moving Average (EMA) (Liveness Detection)
+To defeat printed photos and screen replays, SatyaAuth tracks the physiological variance (e.g., eye-aspect ratio) using an Exponential Moving Average. Static photos have a variance of exactly $0.00$.
+
+$$
+\text{Baseline}_t = (\text{Baseline}_{t-1} \times 0.6) + (\text{Score}_t \times 0.4)
+$$
+$$
+\text{Variance Ratio} = \frac{\text{Score}_t - \text{Baseline}_{t-1}}{\text{Baseline}_{t-1}}
+$$
+
+- **Spike Detection:** `Variance Ratio > 0.05` confirms a genuine physiological movement (e.g., an eyelid closing).
+- **Return Detection:** `Variance Ratio < 0.02` confirms the physiological movement completed organically (e.g., the eye opened again).
+
+---
+
 ## 🔐 Enterprise Security & Privacy (DPDPA 2023)
 
 Unlike standard systems that upload sensitive biometrics to the cloud, SatyaAuth is built on a **Zero-Trust Edge Architecture**:
